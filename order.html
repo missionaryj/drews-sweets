@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order — Drew's Sweets</title>
+  <meta name="description" content="Order cookies from Drew's Sweets. 3 for $2 or 5 for $4. Delivery only." />
+  <meta property="og:title" content="Order — Drew's Sweets" />
+  <meta property="og:description" content="3 for $2 · 5 for $4. Delivery only." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="order-page">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="logo" href="index.html">Drew's Sweets</a>
+      <nav class="nav" aria-label="Primary">
+        <a href="index.html#menu">Menu</a>
+        <a class="btn btn-sm" href="order.html" aria-current="page">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="section">
+    <div class="wrap order-layout">
+      <div>
+        <header class="section-head">
+          <h1>Order cookies</h1>
+          <p class="muted">Delivery only. Pick a bundle, fill it with flavors, and send your request.</p>
+          <p class="muted tiny" id="delivery-notes"></p>
+        </header>
+
+        <form class="order-form" id="order-form" novalidate>
+          <fieldset>
+            <legend>1. Bundle</legend>
+            <div class="bundle-picks" id="bundle-picks" role="radiogroup" aria-label="Bundle size"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>2. Flavors <span class="muted" id="flavor-progress">(0 / 3)</span></legend>
+            <p class="tiny muted">Counts must add up to your bundle size.</p>
+            <div class="flavor-picks" id="flavor-picks"></div>
+            <p class="form-error" id="flavor-error" hidden>Flavor counts must equal your bundle size.</p>
+          </fieldset>
+
+          <fieldset>
+            <legend>3. Delivery</legend>
+            <label>
+              Delivery address
+              <textarea name="address" rows="2" required placeholder="Street, city, zip" autocomplete="street-address"></textarea>
+            </label>
+            <div class="row-2">
+              <label>
+                Delivery date
+                <input name="date" type="date" required />
+              </label>
+              <label>
+                Time slot
+                <select name="slot" required id="slot-select">
+                  <option value="">Choose a time…</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>4. Your info</legend>
+            <label>
+              Name
+              <input name="name" type="text" required autocomplete="name" placeholder="Your name" />
+            </label>
+            <label>
+              Phone
+              <input name="phone" type="tel" required autocomplete="tel" placeholder="(555) 555-5555" />
+            </label>
+            <label>
+              Notes <span class="muted">(optional)</span>
+              <textarea name="notes" rows="2" placeholder="Allergies, gate code, gift message…"></textarea>
+            </label>
+          </fieldset>
+
+          <p class="form-error" id="form-error" hidden></p>
+
+          <div class="form-actions">
+            <!--
+              No backend yet. Submit opens a prefilled mailto to SITE.contact.email
+              (drewlyons05@gmail.com) with subject "New Drew's Sweets order".
+              Later: swap for Formspree / Google Forms / another form endpoint.
+              SMS button only appears when contact.phone is set (not a placeholder).
+            -->
+            <button type="submit" class="btn">Email order</button>
+          </div>
+          <p class="form-note muted tiny">
+            Opens your Mail app with a prefilled order to <strong id="contact-display">drewlyons05@gmail.com</strong> — nothing is stored on a server yet.
+          </p>
+        </form>
+
+        <div class="confirm" id="confirm" hidden>
+          <h2>Request ready</h2>
+          <p class="muted">Review the summary, then send via text or email.</p>
+          <pre id="confirm-body"></pre>
+          <div class="form-actions">
+            <a class="btn" id="confirm-email" href="#">Send email</a>
+            <a class="btn btn-ghost" id="confirm-sms" href="#" data-needs-phone hidden>Send text</a>
+            <button type="button" class="btn btn-ghost" id="confirm-edit">Edit order</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="summary-card" id="summary" aria-live="polite">
+        <h2>Order summary</h2>
+        <ul id="summary-lines"></ul>
+        <p class="summary-empty muted" id="summary-empty">Pick a bundle and flavors to see your total.</p>
+        <div class="summary-total">
+          <span>Total</span>
+          <strong id="summary-total">$0</strong>
+        </div>
+        <p class="tiny muted" id="summary-meta"></p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>Drew's Sweets</strong>
+        <p class="muted">Handcrafted cookies · delivery only</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <span id="foot-email">drewlyons05@gmail.com</span>
+        <span id="foot-phone">[phone]</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="content.js"></script>
+  <script src="order.js"></script>
+</body>
+</html>

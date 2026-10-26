@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drew's Sweets — Handcrafted Cookies</title>
+  <meta name="description" content="Drew's Sweets — handcrafted cookies baked fresh. Order a 3-pack for $2 or a 5-pack for $4. Delivery only." />
+  <meta property="og:title" content="Drew's Sweets — Handcrafted Cookies" />
+  <meta property="og:description" content="Handcrafted cookies baked fresh. 3 for $2 · 5 for $4. Delivery only." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="img/tray-assorted.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="logo" href="index.html">Drew's Sweets</a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#menu">Menu</a>
+        <a href="#how">How to order</a>
+        <a href="#about">About</a>
+        <a class="btn btn-sm" href="order.html">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-media">
+        <picture>
+          <source srcset="img/tray-assorted.webp" type="image/webp" />
+          <img id="hero-img" src="img/tray-assorted.jpg" alt="Assorted Fruity Pebbles and cookies-and-cream cookies on a tray with fall decor" width="900" height="1200" fetchpriority="high" />
+        </picture>
+        <div class="hero-scrim"></div>
+      </div>
+      <div class="wrap hero-copy">
+        <p class="eyebrow" id="hero-loc">[City / Area]</p>
+        <h1>Drew's Sweets</h1>
+        <p class="tagline" id="hero-tag">Handcrafted cookies, baked fresh for you</p>
+        <p class="hero-price" id="hero-bundles">3 for $2 · 5 for $4</p>
+        <div class="hero-actions">
+          <a class="btn" href="order.html">Order now</a>
+          <a class="btn btn-ghost" href="#menu">See flavors</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="menu">
+      <div class="wrap">
+        <header class="section-head">
+          <h2>This week's flavors</h2>
+          <p class="muted">Mix and match any flavors. Bundles: <strong>3 cookies for $2</strong> or <strong>5 cookies for $4</strong>.</p>
+        </header>
+        <div class="grid" id="flavor-grid"></div>
+      </div>
+    </section>
+
+    <section class="section section-soft" id="how">
+      <div class="wrap">
+        <header class="section-head">
+          <h2>How to order</h2>
+          <p class="muted">Delivery only — order right here on the site.</p>
+        </header>
+        <ol class="steps">
+          <li>
+            <span class="step-num">1</span>
+            <div>
+              <h3>Pick a bundle</h3>
+              <p>Choose 3 cookies for $2 or 5 cookies for $4.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <div>
+              <h3>Choose your flavors</h3>
+              <p>Mix any of this week's flavors until your pack is full.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <div>
+              <h3>Delivery details</h3>
+              <p id="step-area">[Delivery area]</p>
+              <p class="muted" id="step-lead">[Lead time]</p>
+            </div>
+          </li>
+        </ol>
+        <p class="cta-row"><a class="btn" href="order.html">Start your order</a></p>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="wrap about">
+        <div class="about-photo">
+          <picture>
+            <source srcset="img/lemon-blueberry-single.webp" type="image/webp" />
+            <img src="img/lemon-blueberry-single.jpg" alt="Fresh lemon blueberry cookie on a plate" width="900" height="1200" loading="lazy" />
+          </picture>
+        </div>
+        <div class="about-copy">
+          <p class="eyebrow">About the baker</p>
+          <h2>Hi, I'm Drew</h2>
+          <p id="about-text">[A short note about Drew — why she started baking, what makes her cookies special. Replace with her own words.]</p>
+          <p class="muted">Based in <span id="about-loc">[City / Area]</span>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>Drew's Sweets</strong>
+        <p class="muted" id="foot-tag">Handcrafted cookies</p>
+      </div>
+      <div class="footer-links">
+        <a href="order.html">Order</a>
+        <span id="foot-email">drewlyons05@gmail.com</span>
+        <span id="foot-phone">[phone]</span>
+        <span id="foot-ig">[@handle]</span>
+      </div>
+      <p class="tiny muted">Draft site — fill remaining placeholders in content.js.</p>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" alt="" />
+  </div>
+
+  <script src="content.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
