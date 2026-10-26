@@ -36,6 +36,12 @@
         </header>
 
         <form class="order-form" id="order-form" novalidate>
+          <!-- Honeypot: leave empty. Bots that fill it are ignored by FormSubmit. -->
+          <label class="honey" aria-hidden="true">
+            Leave blank
+            <input type="text" name="_honey" tabindex="-1" autocomplete="off" />
+          </label>
+
           <fieldset>
             <legend>1. Bundle</legend>
             <div class="bundle-picks" id="bundle-picks" role="radiogroup" aria-label="Bundle size"></div>
@@ -88,26 +94,35 @@
 
           <div class="form-actions">
             <!--
-              No backend yet. Submit opens a prefilled mailto to SITE.contact.email
-              (drewlyons05@gmail.com) with subject "New Drew's Sweets order".
-              Later: swap for Formspree / Google Forms / another form endpoint.
-              SMS button only appears when contact.phone is set (not a placeholder).
+              Submits via FormSubmit AJAX (see order.js + SITE.formSubmit in content.js).
+              First real submission emails Drew an activation link — do that once from a real browser.
+              After activation, replace formSubmit.endpoint with FormSubmit's random alias.
             -->
-            <button type="submit" class="btn">Email order</button>
+            <button type="submit" class="btn" id="submit-btn">Place order</button>
           </div>
           <p class="form-note muted tiny">
-            Opens your Mail app with a prefilled order to <strong id="contact-display">drewlyons05@gmail.com</strong> — nothing is stored on a server yet.
+            Your order is emailed to Drew. Nothing is stored on this site.
           </p>
         </form>
 
-        <div class="confirm" id="confirm" hidden>
-          <h2>Request ready</h2>
-          <p class="muted">Review the summary, then send via text or email.</p>
-          <pre id="confirm-body"></pre>
+        <div class="confirm confirm-success" id="success" hidden>
+          <h2>Order sent!</h2>
+          <p class="muted">Thanks — Drew got your request. She'll follow up to confirm delivery.</p>
+          <pre id="success-body"></pre>
           <div class="form-actions">
-            <a class="btn" id="confirm-email" href="#">Send email</a>
-            <a class="btn btn-ghost" id="confirm-sms" href="#" data-needs-phone hidden>Send text</a>
-            <button type="button" class="btn btn-ghost" id="confirm-edit">Edit order</button>
+            <a class="btn" href="index.html">Back to home</a>
+            <button type="button" class="btn btn-ghost" id="order-another">Place another order</button>
+          </div>
+        </div>
+
+        <div class="confirm confirm-error" id="error-panel" hidden>
+          <h2>Couldn't send just now</h2>
+          <p class="muted" id="error-message">Something went wrong sending your order.</p>
+          <pre id="error-body"></pre>
+          <div class="form-actions">
+            <a class="btn" id="mailto-fallback" href="#">Email order instead</a>
+            <button type="button" class="btn btn-ghost" id="error-retry">Try again</button>
+            <button type="button" class="btn btn-ghost" id="error-edit">Edit order</button>
           </div>
         </div>
       </div>

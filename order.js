@@ -5,9 +5,6 @@
   const $ = (id) => document.getElementById(id);
   const set = (id, text) => { const el = $(id); if (el) el.textContent = text; };
   const unwrap = (v) => (v || "").trim();
-  const isPlaceholder = (v) => !v || unwrap(v).startsWith("[");
-  const digits = (v) => unwrap(v).replace(/[^\d+]/g, "");
-  const phoneConfigured = () => !isPlaceholder(S.contact.phone) && digits(S.contact.phone).replace(/\D/g, "").length >= 7;
 
   document.title = `Order — ${S.businessName}`;
   set("foot-email", S.contact.email);
@@ -16,15 +13,11 @@
     "delivery-notes",
     [S.delivery.areaNote, S.delivery.feeNote, S.delivery.leadTimeNote].join(" · ")
   );
-  set("contact-display", S.contact.email);
-
-  // Hide SMS UI unless a real phone is configured
-  document.querySelectorAll("[data-needs-phone]").forEach((el) => {
-    el.hidden = !phoneConfigured();
-  });
 
   let bundleId = S.bundles[0].id;
   const counts = Object.fromEntries(S.flavors.map((f) => [f.id, 0]));
+  let lastPayload = null;
+  let lastSummary = "";
 
   const bundleBox = $("bundle-picks");
   bundleBox.innerHTML = S.bundles
@@ -148,9 +141,11 @@
   });
 
   const form = $("order-form");
-  const confirm = $("confirm");
+  const success = $("success");
+  const errorPanel = $("error-panel");
+  const submitBtn = $("submit-btn");
 
-  function buildMessage(data) {
+  function buildSummaryText(data) {
     const b = currentBundle();
     const lines = selectedLines().map((l) => `  • ${l.qty}× ${l.name}`).join("\n");
     return [
@@ -175,15 +170,42 @@
       .join("\n");
   }
 
-  /** mailto link — swap for Formspree / Google Forms later */
-  function mailtoHref(body) {
-    const email = unwrap(S.contact.email);
-    const subject = encodeURIComponent(`New ${S.businessName} order`);
-    return `mailto:${email}?subject=${subject}&body=${encodeURIComponent(body)}`;
+  function buildPayload(data) {
+    const b = currentBundle();
+    const flavorLines = selectedLines();
+    const flavorCounts = flavorLines.map((l) => `${l.qty}× ${l.name}`).join(", ");
+    const honey = (form.querySelector('input[name="_honey"]')?.value || "").trim();
+
+    // FormSubmit.co AJAX JSON body.
+    // _captcha must be "false" for AJAX (no interactive reCAPTCHA in fetch).
+    const payload = {
+      _subject: S.formSubmit.subject || `New ${S.businessName} order`,
+      _template: S.formSubmit.template || "table",
+      _captcha: "false",
+      _honey: honey,
+      name: data.name,
+      phone: data.phone,
+      address: data.address,
+      "delivery date": data.date,
+      "time slot": data.slot,
+      bundle: b.display,
+      "flavor counts": flavorCounts,
+      total: `$${b.price}`,
+      notes: data.notes || "(none)",
+      summary: buildSummaryText(data),
+    };
+    return payload;
   }
 
-  function smsHref(body) {
-    return `sms:${digits(S.contact.phone)}?&body=${encodeURIComponent(body)}`;
+  function formSubmitUrl() {
+    const endpoint = encodeURIComponent(unwrap(S.formSubmit.endpoint));
+    return `https://formsubmit.co/ajax/${endpoint}`;
+  }
+
+  function mailtoHref(summary) {
+    const email = unwrap(S.contact.email);
+    const subject = encodeURIComponent(S.formSubmit.subject || `New ${S.businessName} order`);
+    return `mailto:${email}?subject=${subject}&body=${encodeURIComponent(summary)}`;
   }
 
   function validate() {
@@ -218,26 +240,83 @@
     };
   }
 
-  function showConfirm(data) {
-    const body = buildMessage(data);
-    $("confirm-body").textContent = body;
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitBtn.textContent = on ? "Sending…" : "Place order";
+    form.classList.toggle("is-loading", on);
+  }
 
-    const emailLink = $("confirm-email");
-    emailLink.href = mailtoHref(body);
-    emailLink.onclick = null;
-
-    const smsLink = $("confirm-sms");
-    if (phoneConfigured()) {
-      smsLink.hidden = false;
-      smsLink.href = smsHref(body);
-      smsLink.onclick = null;
-    } else if (smsLink) {
-      smsLink.hidden = true;
-    }
-
+  function showSuccess(summary) {
     form.hidden = true;
-    confirm.hidden = false;
-    confirm.scrollIntoView({ behavior: "smooth", block: "start" });
+    errorPanel.hidden = true;
+    success.hidden = false;
+    $("success-body").textContent = summary;
+    success.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showError(message, summary) {
+    form.hidden = true;
+    success.hidden = true;
+    errorPanel.hidden = false;
+    $("error-message").textContent = message;
+    $("error-body").textContent = summary;
+    $("mailto-fallback").href = mailtoHref(summary);
+    errorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showForm() {
+    success.hidden = true;
+    errorPanel.hidden = true;
+    form.hidden = false;
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitOrder(data) {
+    const summary = buildSummaryText(data);
+    const payload = buildPayload(data);
+    lastPayload = payload;
+    lastSummary = summary;
+
+    setLoading(true);
+    try {
+      const res = await fetch(formSubmitUrl(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      let json = null;
+      try {
+        json = await res.json();
+      } catch (_) {
+        json = null;
+      }
+
+      // formsubmit.co typically returns { success: "..." } or { message: "..." } / error shapes
+      const ok =
+        res.ok &&
+        json &&
+        (json.success || json.ok === true || (typeof json.message === "string" && !json.error));
+
+      if (ok) {
+        showSuccess(summary);
+      } else {
+        const msg =
+          (json && (json.message || json.error || json.success === false && "Submission failed")) ||
+          `Couldn't reach the order service (${res.status}).`;
+        showError(String(msg), summary);
+      }
+    } catch (err) {
+      showError(
+        "Network error — your order wasn't sent. You can email it instead.",
+        summary
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   form.addEventListener("submit", (e) => {
@@ -250,18 +329,46 @@
       return;
     }
     errEl.hidden = true;
-    showConfirm(result.data);
-    // Open mail immediately on primary submit
-    window.location.href = mailtoHref(buildMessage(result.data));
+    submitOrder(result.data);
   });
 
-  $("confirm-edit").addEventListener("click", () => {
-    confirm.hidden = true;
+  $("order-another").addEventListener("click", () => {
+    form.reset();
+    Object.keys(counts).forEach((id) => setCount(id, 0));
+    bundleId = S.bundles[0].id;
+    const first = bundleBox.querySelector('input[name="bundle"]');
+    if (first) first.checked = true;
+    renderSummary();
+    showForm();
+  });
+  $("error-edit").addEventListener("click", showForm);
+  $("error-retry").addEventListener("click", () => {
+    if (!lastPayload) {
+      showForm();
+      return;
+    }
+    // Re-validate from form fields
+    const result = validate();
+    if (!result.ok) {
+      showForm();
+      $("form-error").hidden = false;
+      $("form-error").textContent = result.errors.join(" ");
+      return;
+    }
+    errorPanel.hidden = true;
     form.hidden = false;
-    form.scrollIntoView({ behavior: "smooth", block: "start" });
+    submitOrder(result.data);
   });
 
   renderSummary();
+
+  // Expose for tests
+  window.__orderTest = {
+    buildPayload,
+    buildSummaryText,
+    formSubmitUrl,
+    getLastPayload: () => lastPayload,
+  };
 
   function escapeHtml(s) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

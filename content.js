@@ -1,7 +1,6 @@
 /**
  * Drew's Sweets — site config
  * Fill remaining [bracketed] placeholders before going live.
- * CONTACT: swap mailto/SMS later for Formspree / Google Forms / similar.
  */
 window.SITE = {
   businessName: "Drew's Sweets",
@@ -12,11 +11,23 @@ window.SITE = {
   bakerFirstName: "Drew",
 
   contact: {
-    // PLACEHOLDER — used for mailto / SMS until a form backend is wired up
+    // Shown in footer / mailto fallback. Order delivery uses formSubmit.endpoint.
     email: "drewlyons05@gmail.com",
     phone: "[555-555-5555]",
     displayPhone: "[phone number]",
     instagram: "[@handle]",
+  },
+
+  /**
+   * FormSubmit (https://formsubmit.co) — AJAX: POST https://formsubmit.co/ajax/<endpoint>
+   * Default endpoint is the inbox email. After Drew clicks Activate in the first
+   * FormSubmit email, replace this with the random alias string they send
+   * (e.g. "abc123xyz") so the public site does not expose her address.
+   */
+  formSubmit: {
+    endpoint: "drewlyons05@gmail.com",
+    subject: "New Drew's Sweets order",
+    template: "table",
   },
 
   delivery: {
