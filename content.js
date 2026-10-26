@@ -48,8 +48,10 @@ window.SITE = {
 
   // Bundle pricing (exact)
   bundles: [
-    { id: "3", qty: 3, price: 2, label: "3 cookies", display: "3 for $2" },
-    { id: "5", qty: 5, price: 4, label: "5 cookies", display: "5 for $4" },
+    { id: "1", qty: 1, price: 4, label: "1 cookie", display: "1 for $4" },
+    { id: "4", qty: 4, price: 13, label: "4 cookies", display: "4 for $13" },
+    { id: "6", qty: 6, price: 20, label: "6 cookies", display: "6 for $20" },
+    { id: "12", qty: 12, price: 45, label: "Dozen (12)", display: "Dozen for $45" },
   ],
 
   flavors: [

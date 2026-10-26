@@ -12,7 +12,7 @@ python3 -m http.server 5180
 ## Pages
 
 - `index.html` — hero, flavors, how-to-order, about
-- `order.html` — bundle (3 for $2 / 5 for $4), flavors, delivery (Waverly, IL) or pickup checkout
+- `order.html` — bundle (1/$4, 4/$13, 6/$20, dozen/$45), flavors, delivery (Waverly, IL) or pickup checkout
 
 ## FormSubmit
 
@@ -31,7 +31,7 @@ Config in `content.js` → `formSubmit`:
 
 ## Other config
 
-Remaining placeholders in `content.js`: about, phone/Instagram, delivery area/fee/lead time, time slots. Bundle prices are temporary — edit `bundles`.
+Remaining placeholders in `content.js`: about, phone/Instagram, delivery area/fee/lead time, time slots. Bundle prices live in `bundles`.
 
 ## Not published
 
