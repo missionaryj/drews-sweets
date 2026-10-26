@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Order — Drew's Sweets</title>
-  <meta name="description" content="Order cookies from Drew's Sweets. 3 for $2 or 5 for $4. Delivery only." />
+  <meta name="description" content="Order cookies from Drew's Sweets. 3 for $2 or 5 for $4. Delivery in Waverly, IL or pickup." />
   <meta property="og:title" content="Order — Drew's Sweets" />
-  <meta property="og:description" content="3 for $2 · 5 for $4. Delivery only." />
+  <meta property="og:description" content="3 for $2 · 5 for $4. Delivery in Waverly, IL or pickup." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,7 +31,7 @@
       <div>
         <header class="section-head">
           <h1>Order cookies</h1>
-          <p class="muted">Delivery only. Pick a bundle, fill it with flavors, and send your request.</p>
+          <p class="muted">Pick a bundle, fill it with flavors, and choose delivery (Waverly, IL only) or pickup.</p>
           <p class="muted tiny" id="delivery-notes"></p>
         </header>
 
@@ -55,18 +55,39 @@
           </fieldset>
 
           <fieldset>
-            <legend>3. Delivery</legend>
-            <label>
-              Delivery address
-              <textarea name="address" rows="2" required placeholder="Street, city, zip" autocomplete="street-address"></textarea>
-            </label>
+            <legend>3. Delivery or pickup</legend>
+            <div class="bundle-picks" role="radiogroup" aria-label="Delivery or pickup">
+              <label class="bundle-option">
+                <input type="radio" name="fulfillment" value="Delivery" />
+                <span class="bundle-card"><strong>Delivery</strong><span class="tiny muted">Waverly, IL only</span></span>
+              </label>
+              <label class="bundle-option">
+                <input type="radio" name="fulfillment" value="Pickup" checked />
+                <span class="bundle-card"><strong>Pickup</strong><span class="tiny muted">Everyone else</span></span>
+              </label>
+            </div>
+            <p class="tiny muted">Delivery is only available in <strong id="delivery-area-label">Waverly, IL</strong>. If you're outside Waverly, please choose Pickup.</p>
+
+            <div id="delivery-fields" hidden>
+              <label>
+                Street address
+                <input name="street" type="text" autocomplete="address-line1" placeholder="Street and house number" />
+              </label>
+              <label>
+                City
+                <input name="city" type="text" value="Waverly, IL" readonly aria-readonly="true" />
+              </label>
+            </div>
+
+            <p class="pickup-note" id="pickup-note">You'll get the pickup address after you place your order.</p>
+
             <div class="row-2">
               <label>
-                Delivery date
+                Delivery/Pickup date
                 <input name="date" type="date" required />
               </label>
               <label>
-                Time slot
+                Delivery/Pickup time
                 <select name="slot" required id="slot-select">
                   <option value="">Choose a time…</option>
                 </select>
@@ -107,7 +128,11 @@
 
         <div class="confirm confirm-success" id="success" hidden>
           <h2>Order sent!</h2>
-          <p class="muted">Thanks — Drew got your request. She'll follow up to confirm delivery.</p>
+          <p class="muted">Thanks — Drew got your request. She'll follow up to confirm.</p>
+          <div class="pickup-reveal" id="pickup-reveal" hidden>
+            <strong>Pickup address</strong>
+            <p id="pickup-address"></p>
+          </div>
           <pre id="success-body"></pre>
           <div class="form-actions">
             <a class="btn" href="index.html">Back to home</a>
@@ -144,7 +169,7 @@
     <div class="wrap footer-inner">
       <div>
         <strong>Drew's Sweets</strong>
-        <p class="muted">Handcrafted cookies · delivery only</p>
+        <p class="muted">Handcrafted cookies · Champaign, IL</p>
       </div>
       <div class="footer-links">
         <a href="index.html">Home</a>

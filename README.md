@@ -12,13 +12,13 @@ python3 -m http.server 5180
 ## Pages
 
 - `index.html` — hero, flavors, how-to-order, about
-- `order.html` — bundle (3 for $2 / 5 for $4), flavors, delivery-only checkout
+- `order.html` — bundle (3 for $2 / 5 for $4), flavors, delivery (Waverly, IL) or pickup checkout
 
 ## FormSubmit
 
 Config in `content.js` → `formSubmit`:
 
-- `endpoint`: starts as `drewlyons05@gmail.com`
+- `endpoint`: FormSubmit alias (active)
 - After Drew activates (email from FormSubmit), **replace `endpoint` with the random alias** they provide so the public site does not expose her address
 - AJAX: `POST https://formsubmit.co/ajax/<endpoint>` with JSON (`_subject`, `_template: table`, `_captcha: false`, `_honey`, plus order fields)
 - On failure, UI offers a mailto fallback to `contact.email`
@@ -31,7 +31,7 @@ Config in `content.js` → `formSubmit`:
 
 ## Other config
 
-Remaining placeholders in `content.js`: city, about, phone/Instagram, delivery area/fee/lead time, time slots. Bundle prices are temporary — edit `bundles`.
+Remaining placeholders in `content.js`: about, phone/Instagram, delivery area/fee/lead time, time slots. Bundle prices are temporary — edit `bundles`.
 
 ## Not published
 

@@ -158,8 +158,8 @@
       `Flavors:`,
       lines,
       ``,
-      `Delivery address:`,
-      data.address,
+      `Fulfillment: ${data.fulfillment}`,
+      data.fulfillment === "Delivery" ? `Delivery address: ${data.address}` : `Pickup location: ${S.delivery.pickupAddress}`,
       `Date: ${data.date}`,
       `Time: ${data.slot}`,
       data.notes ? `\nNotes: ${data.notes}` : null,
@@ -185,8 +185,10 @@
       _honey: honey,
       name: data.name,
       phone: data.phone,
-      address: data.address,
-      "delivery date": data.date,
+      fulfillment: data.fulfillment,
+      address: data.fulfillment === "Delivery" ? data.address : "(pickup)",
+      "pickup location": data.fulfillment === "Pickup" ? S.delivery.pickupAddress : "(delivery)",
+      "date": data.date,
       "time slot": data.slot,
       bundle: b.display,
       "flavor counts": flavorCounts,
@@ -217,21 +219,29 @@
     }
     const name = (fd.get("name") || "").toString().trim();
     const phone = (fd.get("phone") || "").toString().trim();
-    const address = (fd.get("address") || "").toString().trim();
+    const fulfillment = (fd.get("fulfillment") || "").toString();
+    const street = (fd.get("street") || "").toString().trim();
+    const city = (fd.get("city") || "").toString().trim();
+    const address = fulfillment === "Delivery" ? `${street}, ${city}` : "";
     const date = (fd.get("date") || "").toString();
     const slotVal = (fd.get("slot") || "").toString();
     if (!name) errors.push("Name is required.");
     if (!phone || phone.replace(/\D/g, "").length < 7) errors.push("Enter a valid phone number.");
-    if (!address || address.length < 5) errors.push("Delivery address is required.");
-    if (!date) errors.push("Pick a delivery date.");
-    else if (date < dateInput.min) errors.push("Delivery date can't be in the past.");
-    if (!slotVal) errors.push("Pick a delivery time slot.");
+    if (fulfillment !== "Delivery" && fulfillment !== "Pickup") errors.push("Choose Delivery or Pickup.");
+    if (fulfillment === "Delivery") {
+      if (street.length < 3) errors.push("Street address is required for delivery.");
+      if (norm(city) !== norm(S.delivery.deliveryArea)) errors.push(`Delivery is only available in ${S.delivery.deliveryArea}. Please choose Pickup.`);
+    }
+    if (!date) errors.push("Pick a date.");
+    else if (date < dateInput.min) errors.push("Date can't be in the past.");
+    if (!slotVal) errors.push("Pick a time slot.");
     return {
       ok: errors.length === 0,
       errors,
       data: {
         name,
         phone,
+        fulfillment,
         address,
         date,
         slot: slotVal,
@@ -246,7 +256,14 @@
     form.classList.toggle("is-loading", on);
   }
 
-  function showSuccess(summary) {
+  function showSuccess(summary, data) {
+    const reveal = $("pickup-reveal");
+    if (data && data.fulfillment === "Pickup") {
+      $("pickup-address").textContent = S.delivery.pickupAddress;
+      reveal.hidden = false;
+    } else {
+      reveal.hidden = true;
+    }
     form.hidden = true;
     errorPanel.hidden = true;
     success.hidden = false;
@@ -302,7 +319,7 @@
         (json.success || json.ok === true || (typeof json.message === "string" && !json.error));
 
       if (ok) {
-        showSuccess(summary);
+        showSuccess(summary, data);
       } else {
         const msg =
           (json && (json.message || json.error || json.success === false && "Submission failed")) ||
@@ -334,6 +351,8 @@
 
   $("order-another").addEventListener("click", () => {
     form.reset();
+    if (cityInput) cityInput.value = S.delivery.deliveryArea;
+    syncFulfillment();
     Object.keys(counts).forEach((id) => setCount(id, 0));
     bundleId = S.bundles[0].id;
     const first = bundleBox.querySelector('input[name="bundle"]');
@@ -359,6 +378,18 @@
     form.hidden = false;
     submitOrder(result.data);
   });
+
+  const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z]/g, "");
+  function syncFulfillment() {
+    const v = (form.querySelector('input[name="fulfillment"]:checked') || {}).value;
+    $("delivery-fields").hidden = v !== "Delivery";
+    $("pickup-note").hidden = v !== "Pickup";
+  }
+  form.querySelectorAll('input[name="fulfillment"]').forEach((r) => r.addEventListener("change", syncFulfillment));
+  const cityInput = form.querySelector('input[name="city"]');
+  if (cityInput) cityInput.value = S.delivery.deliveryArea;
+  set("delivery-area-label", S.delivery.deliveryArea);
+  syncFulfillment();
 
   renderSummary();
 

@@ -5,7 +5,7 @@
 window.SITE = {
   businessName: "Drew's Sweets",
   tagline: "Handcrafted cookies, baked fresh for you",
-  location: "[City / Area]",
+  location: "Champaign, IL",
   about:
     "[A short note about Drew — why she started baking, what makes her cookies special. Replace with her own words.]",
   bakerFirstName: "Drew",
@@ -31,7 +31,12 @@ window.SITE = {
   },
 
   delivery: {
-    areaNote: "[Delivery area — e.g. Champaign–Urbana only]",
+    // Delivery is ONLY offered here; everyone else picks up.
+    deliveryArea: "Waverly, IL",
+    // Pickup address is NOT shown on the page before ordering — only in the
+    // success panel after a successful submit, and in the FormSubmit payload.
+    pickupAddress: "535 County Rd 1600, House #26",
+    areaNote: "Delivery available in Waverly, IL only — everyone else picks up.",
     feeNote: "[Delivery fee — or free over $X]",
     leadTimeNote: "[e.g. Orders need 24 hours notice]",
     // Slot labels shown in the order form; edit freely
