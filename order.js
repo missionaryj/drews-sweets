@@ -11,9 +11,10 @@
   set("foot-phone", S.contact.displayPhone);
   set(
     "delivery-notes",
-    [S.delivery.areaNote, S.delivery.feeNote, S.delivery.leadTimeNote].join(" · ")
+    S.delivery.leadTimeNote
   );
 
+  const form = $("order-form");
   let bundleId = S.bundles[0].id;
   const counts = Object.fromEntries(S.flavors.map((f) => [f.id, 0]));
   let lastPayload = null;
@@ -43,8 +44,9 @@
   });
 
   const dateInput = document.querySelector('input[name="date"]');
-  const today = new Date();
-  dateInput.min = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const minD = new Date();
+  minD.setDate(minD.getDate() + (S.delivery.leadDays || 0));
+  dateInput.min = `${minD.getFullYear()}-${String(minD.getMonth() + 1).padStart(2, "0")}-${String(minD.getDate()).padStart(2, "0")}`;
 
   const flavorBox = $("flavor-picks");
   flavorBox.innerHTML = S.flavors
@@ -96,7 +98,9 @@
         `<li><strong>${escapeHtml(b.display)}</strong></li>` +
         lines.map((l) => `<li>${l.qty}× ${escapeHtml(l.name)}</li>`).join("");
     }
-    $("summary-total").textContent = `$${b.price}`;
+    const fv = (form.querySelector('input[name="fulfillment"]:checked') || {}).value;
+    if (fv === "Delivery") ul.insertAdjacentHTML("beforeend", `<li class="muted">${S.delivery.deliveryFee ? "Delivery $" + S.delivery.deliveryFee : "Free delivery"}</li>`);
+    $("summary-total").textContent = `$${b.price + (fv === "Delivery" ? S.delivery.deliveryFee || 0 : 0)}`;
     $("summary-meta").textContent =
       n === b.qty
         ? "Bundle complete — ready to check out."
@@ -140,7 +144,7 @@
     setCount(input.closest(".flavor-row").dataset.id, input.value);
   });
 
-  const form = $("order-form");
+  
   const success = $("success");
   const errorPanel = $("error-panel");
   const submitBtn = $("submit-btn");
@@ -164,7 +168,8 @@
       `Time: ${data.slot}`,
       data.notes ? `\nNotes: ${data.notes}` : null,
       ``,
-      `Total: $${b.price}`,
+      data.fulfillment === "Delivery" ? `Delivery fee: ${S.delivery.deliveryFee ? "$" + S.delivery.deliveryFee : "Free"}` : null,
+      `Total: $${b.price + (data.fulfillment === "Delivery" ? S.delivery.deliveryFee || 0 : 0)}`,
     ]
       .filter((l) => l !== null)
       .join("\n");
@@ -192,7 +197,8 @@
       "time slot": data.slot,
       bundle: b.display,
       "flavor counts": flavorCounts,
-      total: `$${b.price}`,
+      "delivery fee": data.fulfillment === "Delivery" ? (S.delivery.deliveryFee ? `$${S.delivery.deliveryFee}` : "Free") : "(pickup)",
+      total: `$${b.price + (data.fulfillment === "Delivery" ? S.delivery.deliveryFee || 0 : 0)}`,
       notes: data.notes || "(none)",
       summary: buildSummaryText(data),
     };
@@ -222,7 +228,9 @@
     const fulfillment = (fd.get("fulfillment") || "").toString();
     const street = (fd.get("street") || "").toString().trim();
     const city = (fd.get("city") || "").toString().trim();
-    const address = fulfillment === "Delivery" ? `${street}, ${city}` : "";
+    const st = (fd.get("state") || "").toString().trim();
+    const zip = (fd.get("zip") || "").toString().trim();
+    const address = fulfillment === "Delivery" ? `${street}, ${city}, ${st}${zip ? " " + zip : ""}` : "";
     const date = (fd.get("date") || "").toString();
     const slotVal = (fd.get("slot") || "").toString();
     if (!name) errors.push("Name is required.");
@@ -230,10 +238,10 @@
     if (fulfillment !== "Delivery" && fulfillment !== "Pickup") errors.push("Choose Delivery or Pickup.");
     if (fulfillment === "Delivery") {
       if (street.length < 3) errors.push("Street address is required for delivery.");
-      if (norm(city) !== norm(S.delivery.deliveryArea)) errors.push(`Delivery is only available in ${S.delivery.deliveryArea}. Please choose Pickup.`);
+      if (!addressAccepted()) errors.push("Please check your delivery address first.");
     }
     if (!date) errors.push("Pick a date.");
-    else if (date < dateInput.min) errors.push("Date can't be in the past.");
+    else if (date < dateInput.min) errors.push(S.delivery.leadTimeNote);
     if (!slotVal) errors.push("Pick a time slot.");
     return {
       ok: errors.length === 0,
@@ -338,6 +346,8 @@
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    const fsel = (form.querySelector('input[name="fulfillment"]:checked') || {}).value;
+    if (fsel === "Delivery" && !addressAccepted() && !checkAddress()) return;
     const result = validate();
     const errEl = $("form-error");
     if (!result.ok) {
@@ -351,7 +361,7 @@
 
   $("order-another").addEventListener("click", () => {
     form.reset();
-    if (cityInput) cityInput.value = S.delivery.deliveryArea;
+    accepted = false;
     syncFulfillment();
     Object.keys(counts).forEach((id) => setCount(id, 0));
     bundleId = S.bundles[0].id;
@@ -385,10 +395,45 @@
     $("delivery-fields").hidden = v !== "Delivery";
     $("pickup-note").hidden = v !== "Pickup";
   }
-  form.querySelectorAll('input[name="fulfillment"]').forEach((r) => r.addEventListener("change", syncFulfillment));
-  const cityInput = form.querySelector('input[name="city"]');
-  if (cityInput) cityInput.value = S.delivery.deliveryArea;
-  set("delivery-area-label", S.delivery.deliveryArea);
+  let accepted = false;
+  function addrValues() {
+    const g = (n) => (form.querySelector(`input[name="${n}"]`)?.value || "").trim();
+    return { street: g("street"), city: g("city"), state: g("state"), zip: g("zip") };
+  }
+  function isServiceable(a) {
+    const zipOk = !a.zip || S.delivery.deliveryZips.includes(a.zip.slice(0, 5));
+    return norm(a.city) === norm(S.delivery.deliveryCity) && norm(a.state) === norm(S.delivery.deliveryState) && zipOk;
+  }
+  function addressAccepted() { return accepted && isServiceable(addrValues()); }
+  function checkAddress() {
+    const a = addrValues();
+    const msg = $("addr-msg");
+    if (!a.street || !a.city) {
+      msg.hidden = false; msg.className = "addr-msg bad";
+      msg.textContent = "Enter your street and city, then check.";
+      return false;
+    }
+    if (isServiceable(a)) {
+      accepted = true;
+      msg.hidden = false; msg.className = "addr-msg good";
+      msg.textContent = "Great, we deliver there!";
+      $("addr-reject").hidden = true;
+      return true;
+    }
+    accepted = false;
+    msg.hidden = true;
+    const pickup = form.querySelector('input[name="fulfillment"][value="Pickup"]');
+    pickup.checked = true;
+    syncFulfillment();
+    $("addr-reject").hidden = false;
+    renderSummary();
+    return false;
+  }
+  $("check-address").addEventListener("click", checkAddress);
+  ["street", "city", "state", "zip"].forEach((n) =>
+    form.querySelector(`input[name="${n}"]`).addEventListener("input", () => { accepted = false; $("addr-msg").hidden = true; }));
+  form.querySelectorAll('input[name="fulfillment"]').forEach((r) =>
+    r.addEventListener("change", () => { $("addr-reject").hidden = true; syncFulfillment(); renderSummary(); }));
   syncFulfillment();
 
   renderSummary();

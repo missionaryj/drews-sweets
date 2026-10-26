@@ -8,7 +8,6 @@
   set("hero-tag", S.tagline);
   set("hero-loc", S.location);
   set("hero-bundles", S.bundles.map((b) => b.display).join(" · "));
-  set("step-area", S.delivery.areaNote);
   set("step-lead", S.delivery.leadTimeNote);
   set("about-text", S.about);
   set("about-loc", S.location);

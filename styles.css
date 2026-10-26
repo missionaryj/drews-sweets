@@ -544,3 +544,8 @@ code {
 .pickup-reveal { background: #fff; border: 2px dashed var(--pink-deep); border-radius: .85rem; padding: .85rem 1rem; margin: .75rem 0; }
 .pickup-reveal p { margin: .25rem 0 0; font-size: 1.05rem; font-weight: 700; }
 input[readonly] { background: var(--cream-2) !important; }
+.row-3 { display: grid; gap: .75rem; grid-template-columns: 1fr 4.5rem 6rem; }
+.addr-msg { border-radius: .75rem; padding: .6rem .85rem; font-size: .92rem; margin: .5rem 0; font-weight: 600; }
+.addr-msg.good { background: #e9f7ee; color: #2f7d4a; }
+.addr-msg.bad { background: #fdeceb; color: #a33; }
+.addr-msg[hidden] { display: none; }

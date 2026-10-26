@@ -31,14 +31,17 @@ window.SITE = {
   },
 
   delivery: {
-    // Delivery is ONLY offered here; everyone else picks up.
-    deliveryArea: "Waverly, IL",
+    // Delivery accepted ONLY for these (not shown in visible copy).
+    deliveryCity: "Waverly",
+    deliveryState: "IL",
+    deliveryZips: ["62692"],
     // Pickup address is NOT shown on the page before ordering — only in the
     // success panel after a successful submit, and in the FormSubmit payload.
     pickupAddress: "535 County Rd 1600, House #26",
-    areaNote: "Delivery available in Waverly, IL only — everyone else picks up.",
-    feeNote: "[Delivery fee — or free over $X]",
-    leadTimeNote: "[e.g. Orders need 24 hours notice]",
+    pickupArea: "Champaign–Urbana area",
+    deliveryFee: 0,
+    leadDays: 2,
+    leadTimeNote: "Please order at least 2 days ahead.",
     // Slot labels shown in the order form; edit freely
     timeSlots: ["4:00 – 6:00 pm", "6:00 – 8:00 pm", "8:00 – 10:00 pm"],
   },

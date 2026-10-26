@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Order — Drew's Sweets</title>
-  <meta name="description" content="Order cookies from Drew's Sweets. 3 for $2 or 5 for $4. Delivery in Waverly, IL or pickup." />
+  <meta name="description" content="Order cookies from Drew's Sweets. 3 for $2 or 5 for $4. Delivery or pickup." />
   <meta property="og:title" content="Order — Drew's Sweets" />
-  <meta property="og:description" content="3 for $2 · 5 for $4. Delivery in Waverly, IL or pickup." />
+  <meta property="og:description" content="3 for $2 · 5 for $4. Delivery or pickup." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,7 +31,7 @@
       <div>
         <header class="section-head">
           <h1>Order cookies</h1>
-          <p class="muted">Pick a bundle, fill it with flavors, and choose delivery (Waverly, IL only) or pickup.</p>
+          <p class="muted">Pick a bundle, fill it with flavors, and choose delivery or pickup.</p>
           <p class="muted tiny" id="delivery-notes"></p>
         </header>
 
@@ -59,28 +59,32 @@
             <div class="bundle-picks" role="radiogroup" aria-label="Delivery or pickup">
               <label class="bundle-option">
                 <input type="radio" name="fulfillment" value="Delivery" />
-                <span class="bundle-card"><strong>Delivery</strong><span class="tiny muted">Waverly, IL only</span></span>
+                <span class="bundle-card"><strong>Delivery</strong><span class="tiny muted">Delivery may vary by location — enter your address to see if we deliver to you.</span></span>
               </label>
               <label class="bundle-option">
                 <input type="radio" name="fulfillment" value="Pickup" checked />
-                <span class="bundle-card"><strong>Pickup</strong><span class="tiny muted">Everyone else</span></span>
+                <span class="bundle-card"><strong>Pickup</strong><span class="tiny muted">Champaign–Urbana area</span></span>
               </label>
             </div>
-            <p class="tiny muted">Delivery is only available in <strong id="delivery-area-label">Waverly, IL</strong>. If you're outside Waverly, please choose Pickup.</p>
 
             <div id="delivery-fields" hidden>
               <label>
                 Street address
                 <input name="street" type="text" autocomplete="address-line1" placeholder="Street and house number" />
               </label>
-              <label>
-                City
-                <input name="city" type="text" value="Waverly, IL" readonly aria-readonly="true" />
-              </label>
+              <div class="row-3">
+                <label>City <input name="city" type="text" autocomplete="address-level2" /></label>
+                <label>State <input name="state" type="text" value="IL" maxlength="2" autocomplete="address-level1" /></label>
+                <label>ZIP <input name="zip" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" /></label>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="check-address">Check address</button>
+              <p class="addr-msg" id="addr-msg" hidden></p>
             </div>
 
+            <p class="addr-msg bad" id="addr-reject" hidden>Sorry, we don't deliver to that address yet — pickup is available in the Champaign–Urbana area.</p>
             <p class="pickup-note" id="pickup-note">You'll get the pickup address after you place your order.</p>
 
+            <p class="tiny muted" id="lead-note">Please order at least 2 days ahead.</p>
             <div class="row-2">
               <label>
                 Delivery/Pickup date
