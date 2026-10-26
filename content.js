@@ -25,7 +25,7 @@ window.SITE = {
    * (e.g. "abc123xyz") so the public site does not expose her address.
    */
   formSubmit: {
-    endpoint: "drewlyons05@gmail.com",
+    endpoint: "8df40da8e4e61e20f846f327772b18dc",
     subject: "New Drew's Sweets order",
     template: "table",
   },
